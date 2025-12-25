@@ -5,6 +5,8 @@ import type { PropsWithChildren } from "react";
 import { Footer } from "@/components/main/footer";
 import { Navbar } from "@/components/main/navbar";
 import { StarsCanvas } from "@/components/main/star-background";
+import AutoMusic from "@/components/AutoMusic";
+
 import { siteConfig } from "@/config";
 import { cn } from "@/lib/utils";
 
@@ -27,9 +29,19 @@ export default function RootLayout({ children }: PropsWithChildren) {
           inter.className
         )}
       >
+        {/* AUTOPLAY MUSIC (hidden, background) */}
+        <AutoMusic />
+
+        {/* BACKGROUND STAR */}
         <StarsCanvas />
+
+        {/* NAVBAR */}
         <Navbar />
+
+        {/* PAGE CONTENT */}
         {children}
+
+        {/* FOOTER */}
         <Footer />
       </body>
     </html>
