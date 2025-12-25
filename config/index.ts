@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const siteConfig: Metadata = {
-  title: "Reyy Anti Meninggu | Space Portfolio",
+  title: "Reyy Anti Meninggi | Space Portfolio",
   description: "Welcome to   description: "Welcome to my Porto Reyy full stack N,
   keywords: [
     "reactjs",
@@ -35,7 +35,7 @@ export const siteConfig: Metadata = {
     "css",
   ] as Array<string>,
   authors: {
-    name: "Sanidhya Kumar Verma",
-    url: "https://github.com/sanidhyy",
+    name: "Reyy Shinn.",
+    url: "belum ada",
   },
 } as const;
