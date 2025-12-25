@@ -12,53 +12,76 @@ const playlist = [
 ];
 
 export default function AutoMusic() {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [index, setIndex] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Fade in volume
+  const [index, setIndex] = useState(0);
+  const [isStarted, setIsStarted] = useState(false);
+
+  // Fade-in volume (AMAN, tidak dobel)
   const fadeIn = () => {
     if (!audioRef.current) return;
 
-    audioRef.current.volume = 0; // mulai dari pelan
+    if (fadeInterval.current) {
+      clearInterval(fadeInterval.current);
+    }
+
+    audioRef.current.volume = 0;
     let volume = 0;
 
-    const interval = setInterval(() => {
-      if (!audioRef.current) return clearInterval(interval);
+    fadeInterval.current = setInterval(() => {
+      if (!audioRef.current) return;
 
-      volume += 0.02; // kecepatan naik (ubah kalau mau)
+      volume += 0.02;
       if (volume >= 0.6) {
-        volume = 0.6; // volume maksimal (0.0 - 1.0)
-        clearInterval(interval);
+        audioRef.current.volume = 0.6;
+        clearInterval(fadeInterval.current!);
+        fadeInterval.current = null;
+        return;
       }
 
       audioRef.current.volume = volume;
-    }, 150); // delay per step (ms)
+    }, 150);
   };
 
-  // Autoplay setelah 1 klik user
-  useEffect(() => {
-    const startMusic = () => {
-      if (!audioRef.current) return;
-
-      audioRef.current.play().then(fadeIn).catch(() => {});
-      document.removeEventListener("click", startMusic);
-    };
-
-    document.addEventListener("click", startMusic);
-
-    return () => {
-      document.removeEventListener("click", startMusic);
-    };
-  }, []);
-
-  // Ganti lagu → fade in lagi
-  useEffect(() => {
+  // Main play function (SATU pintu)
+  const playCurrent = async () => {
     if (!audioRef.current) return;
 
-    audioRef.current.play().then(fadeIn).catch(() => {});
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+
+    try {
+      await audioRef.current.play();
+      fadeIn();
+    } catch {
+      // autoplay blocked → akan jalan setelah klik
+    }
+  };
+
+  // Start autoplay after first user interaction
+  useEffect(() => {
+    const start = () => {
+      if (isStarted) return;
+
+      setIsStarted(true);
+      playCurrent();
+
+      document.removeEventListener("click", start);
+    };
+
+    document.addEventListener("click", start);
+    return () => document.removeEventListener("click", start);
+  }, [isStarted]);
+
+  // When song changes → play next (TIDAK MEMOTONG)
+  useEffect(() => {
+    if (!isStarted) return;
+    playCurrent();
   }, [index]);
 
-  const nextSong = () => {
+  // When song ends → next song (loop)
+  const handleEnded = () => {
     setIndex((prev) => (prev + 1) % playlist.length);
   };
 
@@ -66,9 +89,9 @@ export default function AutoMusic() {
     <audio
       ref={audioRef}
       src={playlist[index]}
-      onEnded={nextSong}
-      loop={false}
+      onEnded={handleEnded}
+      preload="auto"
       style={{ display: "none" }}
     />
   );
-}
+      }
