@@ -23,7 +23,7 @@ export const Navbar = () => {
             className="cursor-pointer"
           />
           <div className="hidden md:flex md:selffont-bold ml-[10px] text-gray-300">
-            John Doe
+            Reyy Zhouu.
           </div>
         </Link>
 
